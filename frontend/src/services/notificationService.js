@@ -20,4 +20,9 @@ export const notificationService = {
     const response = await api.post('/notifications/trigger-check');
     return response.data;
   },
+
+  sendTestEmail: async () => {
+    const response = await api.post('/notifications/test-email');
+    return response.data;
+  },
 };

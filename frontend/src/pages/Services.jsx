@@ -15,11 +15,13 @@ import {
   Filter,
 } from 'lucide-react';
 import { serviceService } from '../services/serviceService';
+import { productService } from '../services/productService';
 import ServiceStatusBadge from '../components/ServiceStatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import DocumentViewerModal from '../components/DocumentViewerModal';
+import BrandSupportDirectory from '../components/BrandSupportDirectory';
 import { formatDate } from '../utils/dateUtils';
 import { formatCurrency } from '../utils/formatters';
 
@@ -31,6 +33,15 @@ export default function Services() {
 
   // Status & filter tabs
   const [activeTab, setActiveTab] = useState(searchParams.get('filter') || 'all');
+  const [userProducts, setUserProducts] = useState([]);
+
+  // Fetch user products for brand badges
+  useEffect(() => {
+    productService
+      .getProducts()
+      .then((data) => setUserProducts(data.products || []))
+      .catch((err) => console.error('Error fetching products in services:', err));
+  }, []);
 
   // Mark Completed Modal
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
@@ -47,6 +58,11 @@ export default function Services() {
   const [selectedDoc, setSelectedDoc] = useState(null);
 
   const fetchServices = useCallback(async () => {
+    if (activeTab === 'directory') {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const params = {};
@@ -151,10 +167,14 @@ export default function Services() {
           { key: 'overdue', label: 'Overdue Attention' },
           { key: 'completed', label: 'Completed History' },
           { key: 'cancelled', label: 'Cancelled' },
+          { key: 'directory', label: '📞 Official Brand Helplines' },
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => {
+              setActiveTab(tab.key);
+              setSearchParams(tab.key === 'all' ? {} : { filter: tab.key });
+            }}
             className={`py-2 px-3.5 rounded-xl transition-all whitespace-nowrap ${
               activeTab === tab.key
                 ? 'bg-indigo-600 text-white shadow-sm'
@@ -166,8 +186,10 @@ export default function Services() {
         ))}
       </div>
 
-      {/* Services List / Table */}
-      {loading ? (
+      {/* Services List / Table OR Brand Directory */}
+      {activeTab === 'directory' ? (
+        <BrandSupportDirectory userProducts={userProducts} />
+      ) : loading ? (
         <LoadingSpinner message="Loading service records..." />
       ) : services.length === 0 ? (
         <EmptyState

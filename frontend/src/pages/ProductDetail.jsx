@@ -26,6 +26,7 @@ import ServiceStatusBadge from '../components/ServiceStatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import DocumentViewerModal from '../components/DocumentViewerModal';
+import BrandSupportCard from '../components/BrandSupportCard';
 import { formatDate } from '../utils/dateUtils';
 import { formatCurrency, formatFileSize, getCategoryColor } from '../utils/formatters';
 
@@ -368,22 +369,8 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Quick Service Scheduler Button */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 mb-1">
-              Need Maintenance or Repair?
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Schedule preventive service, repairs, or inspections for this product.
-            </p>
-            <Link
-              to={`/services/new?productId=${product._id}`}
-              className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Schedule Service for this Product</span>
-            </Link>
-          </div>
+          {/* Official Brand Customer Support Directory & Claim Logger */}
+          <BrandSupportCard brand={product.brand} product={product} />
         </div>
       </div>
 

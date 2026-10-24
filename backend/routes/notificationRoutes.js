@@ -5,6 +5,7 @@ const {
   markAsRead,
   markAllAsRead,
   triggerCheck,
+  testEmail,
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/auth');
 
@@ -14,5 +15,6 @@ router.get('/', getNotifications);
 router.patch('/read-all', markAllAsRead);
 router.patch('/:id/read', markAsRead);
 router.post('/trigger-check', triggerCheck);
+router.post('/test-email', testEmail);
 
 module.exports = router;

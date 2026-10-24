@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const ServiceRecord = require('../models/ServiceRecord');
 const User = require('../models/User');
 const { sendEmail } = require('./emailService');
+const { buildWarrantyEmailTemplate } = require('./emailTemplates');
 const dayjs = require('dayjs');
 
 /**
@@ -27,11 +28,11 @@ const generateReminders = async () => {
       const diffDays = Math.ceil(expiry.diff(today, 'day', true));
       const expiryFormatted = dayjs(product.warrantyExpiryDate).format('YYYY-MM-DD');
 
-      // Milestone check: 30 days, 7 days, 1 day, or expired today
+      // Milestone check: 30 days, 7 days (1 week), 1 day (tomorrow), or expired today (0)
       const milestones = [
         { days: 30, type: 'warranty_expiring_30', title: 'Warranty Expiring in 30 Days' },
-        { days: 7, type: 'warranty_expiring_7', title: 'Urgent: Warranty Expiring in 7 Days' },
-        { days: 1, type: 'warranty_expiring_1', title: 'Final Reminder: Warranty Expires Tomorrow' },
+        { days: 7, type: 'warranty_expiring_7', title: 'Urgent: Warranty Expiring in 1 Week (7 Days)' },
+        { days: 1, type: 'warranty_expiring_1', title: 'Final Reminder: Warranty Expires Tomorrow (1 Day)' },
         { days: 0, type: 'warranty_expired', title: 'Warranty Expired' },
       ];
 
@@ -60,12 +61,30 @@ const generateReminders = async () => {
               });
               createdCount++;
 
-              // Optional email alert
+              // Dispatch real-time Nodemailer alert if user has email
               if (product.userId.email) {
+                let subject = `[Warranty Alert] ${milestone.title}: ${product.productName}`;
+                if (milestone.days === 7) {
+                  subject = `[Warranty Alert] ⚠️ 1 Week Left: Your warranty for "${product.productName}" expires in 7 days`;
+                } else if (milestone.days === 1) {
+                  subject = `[Final Warning] 🚨 1 Day Left: Your warranty for "${product.productName}" expires tomorrow!`;
+                }
+
+                const emailHtml = buildWarrantyEmailTemplate({
+                  userName: product.userId.name,
+                  productName: product.productName,
+                  brand: product.brand,
+                  modelNumber: product.modelNumber,
+                  serialNumber: product.serialNumber,
+                  warrantyExpiryDate: product.warrantyExpiryDate,
+                  daysRemaining: milestone.days,
+                  milestoneType: milestone.type,
+                });
+
                 await sendEmail({
                   to: product.userId.email,
-                  subject: `[Warranty Reminder] ${milestone.title}: ${product.productName}`,
-                  html: `<p>Hello ${product.userId.name},</p><p>${message}</p><p>View your product details on Digital Warranty Tracker.</p>`,
+                  subject,
+                  html: emailHtml,
                 });
               }
             } catch (err) {

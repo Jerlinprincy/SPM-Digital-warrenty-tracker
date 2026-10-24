@@ -8,6 +8,7 @@ import {
   Calendar,
   AlertCircle,
   Filter,
+  Mail,
 } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
 import { formatDate, fromNow } from '../utils/dateUtils';
@@ -79,6 +80,30 @@ export default function Notifications() {
               <span>Mark All Read</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Real-Time Nodemailer Reminder Schedule Info Banner */}
+      <div className="p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl shadow-sm border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0">
+            <Mail className="w-5 h-5 text-indigo-300" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Real-Time Automated Email Reminders
+            </h3>
+            <p className="text-xs text-slate-300 mt-0.5">
+              Nodemailer automatically dispatches alerts at <strong>1 Week (7 Days)</strong> and <strong>1 Day</strong> before warranty expiration, plus on the day of expiry.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            7-Day & 1-Day Engine Active
+          </span>
         </div>
       </div>
 

@@ -74,6 +74,8 @@ const markAllAsRead = async (req, res, next) => {
   }
 };
 
+const { sendTestEmail, isEmailConfigured } = require('../services/emailService');
+
 // @desc    Trigger reminder generation manually (for testing or instant sync)
 // @route   POST /api/notifications/trigger-check
 // @access  Private
@@ -90,9 +92,46 @@ const triggerCheck = async (req, res, next) => {
   }
 };
 
+// @desc    Send an instant test warranty reminder email to logged in user
+// @route   POST /api/notifications/test-email
+// @access  Private
+const testEmail = async (req, res, next) => {
+  try {
+    const userEmail = req.user.email;
+    const userName = req.user.name;
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current user does not have a registered email address.',
+      });
+    }
+
+    const result = await sendTestEmail(userEmail, userName);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: `Test warranty reminder email sent to ${userEmail}!`,
+        messageId: result.messageId,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: `Email could not be delivered: ${result.reason || result.error}`,
+        isConfigured: isEmailConfigured(),
+        tip: 'Ensure SMTP_USER and SMTP_PASS (or Gmail App Password) are set in backend/.env',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNotifications,
   markAsRead,
   markAllAsRead,
   triggerCheck,
+  testEmail,
 };
